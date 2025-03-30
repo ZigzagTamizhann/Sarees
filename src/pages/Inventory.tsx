@@ -3,9 +3,24 @@ import { Search, Plus } from 'lucide-react';
 
 // Sample initial products data
 const initialProducts = [
-  { code: 'B-1', name: '4689 Cotton Blouse', category: 'Blouses', price: 65, qty: 100, sold: 0 },
-  { code: 'B-2', name: 'Arvind Cotton Blouse', category: 'Blouses', price: 85, qty: 100, sold: 0 },
-  // Add more initial products if necessary
+  { 
+    code: 'B-1', 
+    name: '4689 Cotton Blouse', 
+    category: 'Blouses', 
+    costPrice: 45,
+    price: 65, 
+    qty: 100, 
+    sold: 0 
+  },
+  { 
+    code: 'B-2', 
+    name: 'Arvind Cotton Blouse', 
+    category: 'Blouses', 
+    costPrice: 60,
+    price: 85, 
+    qty: 100, 
+    sold: 0 
+  },
 ];
 
 export const Inventory = () => {
@@ -17,6 +32,7 @@ export const Inventory = () => {
     code: '',
     name: '',
     category: '',
+    costPrice: 0,
     price: 0,
     qty: 0,
     sold: 0,
@@ -38,7 +54,7 @@ export const Inventory = () => {
       const timer = setTimeout(() => setUndoTimer(undoTimer - 1), 1000);
       return () => clearTimeout(timer);
     } else if (undoTimer === 0) {
-      setDeletedProduct(null); // Auto-clear after timeout
+      setDeletedProduct(null);
     }
   }, [undoTimer, deletedProduct]);
 
@@ -52,34 +68,36 @@ export const Inventory = () => {
     const productToDelete = products.find((product) => product.code === code);
     setDeletedProduct(productToDelete);
 
-    // Remove product from the list
     const updatedProducts = products.filter((product) => product.code !== code);
     setProducts(updatedProducts);
 
-    // Reset undo timer
     setUndoTimer(10);
   };
 
   const handleUndoDelete = () => {
-    // Undo the delete action by adding the deleted product back in the correct position
     if (deletedProduct) {
       const updatedProducts = [...products, deletedProduct];
-      
-      // Sort products by code to maintain order
       updatedProducts.sort((a, b) => a.code.localeCompare(b.code));
-
       setProducts(updatedProducts);
-      setDeletedProduct(null); // Clear the deleted product
-      setUndoTimer(0); // Stop the undo timer
+      setDeletedProduct(null);
+      setUndoTimer(0);
     }
   };
 
   const handleAddProduct = () => {
-    const newCode = `P-${Math.floor(Math.random() * 10000)}`;
+    const newCode = P-${Math.floor(Math.random() * 10000)};
     const updatedProducts = [...products, { ...newProduct, code: newCode }];
     setProducts(updatedProducts);
-    setIsModalOpen(false); // Close modal after adding product
-    setNewProduct({ code: '', name: '', category: '', price: 0, qty: 0, sold: 0 }); // Reset form
+    setIsModalOpen(false);
+    setNewProduct({ 
+      code: '', 
+      name: '', 
+      category: '', 
+      costPrice: 0, 
+      price: 0, 
+      qty: 0, 
+      sold: 0 
+    });
   };
 
   const handleEdit = (product) => {
@@ -92,12 +110,10 @@ export const Inventory = () => {
       product.code === editedProduct.code ? editedProduct : product
     );
 
-    // Sort products by code to maintain order
     updatedProducts.sort((a, b) => a.code.localeCompare(b.code));
-
     setProducts(updatedProducts);
     setIsModalOpen(false);
-    setEditedProduct(null); // Clear edited product
+    setEditedProduct(null);
   };
 
   const handleChange = (e) => {
@@ -140,36 +156,46 @@ export const Inventory = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost Price</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Selling Price</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Margin</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredProducts.map((product) => (
-              <tr key={product.code}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.code}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.category}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{product.price}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.qty}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.sold}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button className="text-purple-600 hover:text-purple-900" onClick={() => handleEdit(product)}>
-                    Edit
-                  </button>
-                  <button className="ml-4 text-red-600 hover:text-red-900" onClick={() => handleDelete(product.code)}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {filteredProducts.map((product) => {
+              const margin = product.price - product.costPrice;
+              const marginPercentage = ((margin / product.costPrice) * 100).toFixed(2);
+              return (
+                <tr key={product.code}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.code}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.category}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{product.costPrice}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{product.price}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ₹{margin} ({marginPercentage}%)
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.qty}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.sold}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button className="text-purple-600 hover:text-purple-900" onClick={() => handleEdit(product)}>
+                      Edit
+                    </button>
+                    <button className="ml-4 text-red-600 hover:text-red-900" onClick={() => handleDelete(product.code)}>
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
-      {/* Add Product Modal */}
+      {/* Add/Edit Product Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-md shadow-md w-96">
@@ -196,7 +222,17 @@ export const Inventory = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Price</label>
+                <label className="block text-sm font-medium text-gray-700">Cost Price</label>
+                <input
+                  type="number"
+                  name="costPrice"
+                  value={editedProduct ? editedProduct.costPrice : newProduct.costPrice}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Selling Price</label>
                 <input
                   type="number"
                   name="price"
